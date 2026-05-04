@@ -1,5 +1,32 @@
 const STORAGE_KEY = "edumanage-saas-mvp-v1";
 
+// ── Supabase init (replace with your project credentials) ──
+const SUPABASE_URL = "https://upfbgiymsydadnhahyrx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwZmJnaXltc3lkYWRuaGFoeXJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDY2NzksImV4cCI6MjA5MzQ4MjY3OX0.6DOHS3jjaSreR7SuBXrUgExRvoz_CWdBMgimnPxPShA";
+const { createClient } = window.supabase ?? {};
+const supabase = createClient ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let currentUser = null;
+let authReady = false;
+
+// ── Auth state listener ──
+if (supabase) {
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user ?? null;
+    authReady = true;
+    if (currentUser) {
+      loadStateFromSupabase().then(() => {
+        render();
+      });
+    } else {
+      state = loadState();
+      render();
+    }
+  });
+} else {
+  authReady = true;
+}
+
 const labels = {
   en: {
     "brand.tagline": "Coaching OS",
@@ -180,6 +207,7 @@ let feeCacheVersion = "";
 let state = loadState();
 let ui = {
   view: "dashboard",
+  authMode: "signin",
   studentSearch: "",
   studentBatch: "all",
   editingStudentId: null,
@@ -209,6 +237,11 @@ document.addEventListener("click", (event) => {
   if (!actionButton) return;
 
   const { action, id, status } = actionButton.dataset;
+
+  if (action === "toggle-auth-mode") {
+    ui.authMode = ui.authMode === "signup" ? "signin" : "signup";
+    render();
+  }
 
   if (action === "open-student-form") {
     ui.view = "students";
@@ -294,9 +327,22 @@ document.addEventListener("click", (event) => {
       render();
     }
   }
+
+  if (action === "sign-out") {
+    signOut();
+  }
 });
 
 document.addEventListener("submit", (event) => {
+  if (event.target.id === "authForm") {
+    event.preventDefault();
+    const data = new FormData(event.target);
+    const email = String(data.get("email") || "").trim();
+    const password = String(data.get("password") || "").trim();
+    if (ui.authMode === "signup") signUp(email, password).then(() => toast("Check email to confirm"));
+    else signIn(email, password);
+  }
+
   if (event.target.id === "studentForm") {
     event.preventDefault();
     saveStudent(event.target);
@@ -363,6 +409,16 @@ langToggle.addEventListener("click", () => {
 });
 
 function render() {
+  if (!authReady) {
+    viewRoot.innerHTML = `<div class="empty-state">Loading...</div>`;
+    return;
+  }
+
+  if (!currentUser) {
+    viewRoot.innerHTML = renderAuth();
+    return;
+  }
+
   applyChrome();
 
   const views = {
@@ -376,6 +432,45 @@ function render() {
   };
 
   viewRoot.innerHTML = views[ui.view]();
+}
+
+function renderAuth() {
+  return `
+    <div class="auth-container">
+      <div class="brand" style="justify-content:center;margin-bottom:24px">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img"><path d="M4 6.5 12 3l8 3.5-8 3.5-8-3.5Z"></path><path d="M7 10v5.2c0 1.7 2.2 3 5 3s5-1.3 5-3V10"></path><path d="M20 7v5"></path></svg>
+        </div>
+        <div>
+          <strong>EduManage</strong>
+          <span data-i18n="brand.tagline">Coaching OS</span>
+        </div>
+      </div>
+      <div class="panel" style="max-width:400px;margin:0 auto">
+        <div class="panel-head">
+          <h3>${ui.authMode === "signup" ? (currentLang() === "bn" ? "অ্যাকাউন্ট তৈরি করুন" : "Create account") : (currentLang() === "bn" ? "সাইন ইন করুন" : "Sign in")}</h3>
+        </div>
+        <form id="authForm" class="form-grid">
+          <label class="field span-2">
+            <span>Email</span>
+            <input name="email" type="email" required placeholder="you@example.com">
+          </label>
+          <label class="field span-2">
+            <span>Password</span>
+            <input name="password" type="password" required minlength="6" placeholder="••••••">
+          </label>
+          <div class="form-actions">
+            <button class="button primary" type="submit">${ui.authMode === "signup" ? (currentLang() === "bn" ? "রেজিস্টার" : "Register") : (currentLang() === "bn" ? "সাইন ইন" : "Sign in")}</button>
+          </div>
+        </form>
+        <p style="text-align:center;margin-top:12px">
+          <button class="button ghost" data-action="toggle-auth-mode" type="button">
+            ${ui.authMode === "signup" ? (currentLang() === "bn" ? "অ্যাকাউন্ট আছে? সাইন ইন" : "Have an account? Sign in") : (currentLang() === "bn" ? "নতুন অ্যাকাউন্ট? রেজিস্টার" : "New account? Register")}
+          </button>
+        </p>
+      </div>
+    </div>
+  `;
 }
 
 function applyChrome() {
@@ -1145,6 +1240,20 @@ function renderSettings() {
           ${priceCard("Institute Plus", 1199, ["Unlimited students", "Multi-branch", "Priority support", "Custom branding"], false)}
         </div>
       </section>
+
+      ${currentUser ? `
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>${currentLang() === "bn" ? "অ্যাকাউন্ট" : "Account"}</h3>
+            <p>${currentUser.email}</p>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="button ghost" data-action="sign-out" type="button">${currentLang() === "bn" ? "সাইন আউট" : "Sign out"}</button>
+        </div>
+      </section>
+      ` : ""}
     </div>
   `;
 }
@@ -1640,6 +1749,7 @@ function saveState() {
   feeStatusCache.clear();
   feeCacheVersion = "";
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (currentUser && supabase) saveStateToSupabase();
 }
 
 function loadState() {
@@ -1652,6 +1762,68 @@ function loadState() {
   const demo = createDemoState();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
   return demo;
+}
+
+// ── Supabase sync helpers ──
+async function saveStateToSupabase() {
+  if (!currentUser || !supabase) return;
+  const uid = currentUser.id;
+
+  await Promise.all([
+    syncUpsert("students", state.students.map(s => ({ ...s, user_id: uid }))),
+    syncUpsert("attendance", state.attendance.map(a => ({ ...a, user_id: uid }))),
+    syncUpsert("payments", state.payments.map(p => ({ ...p, user_id: uid }))),
+    syncUpsert("reminders", state.reminders.map(r => ({ ...r, user_id: uid }))),
+    supabase.from("institute_settings").upsert({ ...state.institute, user_id: uid }, { onConflict: "user_id" })
+  ]);
+}
+
+async function loadStateFromSupabase() {
+  if (!currentUser || !supabase) return;
+  const uid = currentUser.id;
+
+  const [stuRes, attRes, payRes, remRes, instRes] = await Promise.all([
+    supabase.from("students").select("*").eq("user_id", uid),
+    supabase.from("attendance").select("*").eq("user_id", uid),
+    supabase.from("payments").select("*").eq("user_id", uid),
+    supabase.from("reminders").select("*").eq("user_id", uid),
+    supabase.from("institute_settings").select("*").eq("user_id", uid).single()
+  ]);
+
+  const institute = instRes.data || state.institute;
+  const students = stuRes.data || state.students;
+  const attendance = attRes.data || state.attendance;
+  const payments = payRes.data || state.payments;
+  const reminders = remRes.data || state.reminders;
+
+  state = { institute, students, attendance, payments, reminders };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+async function syncUpsert(table, rows) {
+  if (!rows.length) return;
+  const { error } = await supabase.from(table).upsert(rows, { onConflict: "id" });
+  if (error) console.warn(`Sync failed for ${table}:`, error.message);
+}
+
+// ── Auth helpers (call these from browser console or add UI) ──
+async function signUp(email, password) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) toast(error.message);
+  return data;
+}
+
+async function signIn(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) toast(error.message);
+  return data;
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  state = loadState();
+  render();
 }
 
 function createDemoState() {
@@ -1775,3 +1947,93 @@ function createDemoState() {
 function nextDemoReceipt(date, count) {
   return `EDU-${date.replaceAll("-", "")}-${String(count).padStart(4, "0")}`;
 }
+
+/*
+  SUPABASE TABLE SETUP — run this SQL in your Supabase SQL Editor:
+
+  -- Institute settings (one row per user)
+  create table if not exists public.institute_settings (
+    user_id uuid references auth.users not null default auth.uid(),
+    name text not null default '',
+    owner text not null default '',
+    phone text not null default '',
+    address text not null default '',
+    plan text not null default 'Professional',
+    locale text not null default 'en',
+    primary key (user_id)
+  );
+  alter table public.institute_settings enable row level security;
+  create policy "Users manage own institute"
+    on public.institute_settings for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+  -- Students
+  create table if not exists public.students (
+    id text primary key,
+    user_id uuid references auth.users not null default auth.uid(),
+    name text not null,
+    klass text not null,
+    subjects text[] not null,
+    batch text not null,
+    guardian text not null,
+    phone text not null,
+    fee integer not null,
+    dueDay integer not null,
+    status text not null,
+    joined text not null
+  );
+  alter table public.students enable row level security;
+  create policy "Users manage own students"
+    on public.students for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+  -- Attendance
+  create table if not exists public.attendance (
+    id text primary key,
+    user_id uuid references auth.users not null default auth.uid(),
+    studentId text not null,
+    date text not null,
+    status text not null
+  );
+  alter table public.attendance enable row level security;
+  create policy "Users manage own attendance"
+    on public.attendance for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+  -- Payments
+  create table if not exists public.payments (
+    id text primary key,
+    user_id uuid references auth.users not null default auth.uid(),
+    studentId text not null,
+    amount integer not null,
+    month text not null,
+    date text not null,
+    method text not null,
+    receiptNo text not null
+  );
+  alter table public.payments enable row level security;
+  create policy "Users manage own payments"
+    on public.payments for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+  -- Reminders
+  create table if not exists public.reminders (
+    id text primary key,
+    user_id uuid references auth.users not null default auth.uid(),
+    studentId text not null,
+    month text not null,
+    channel text not null,
+    status text not null,
+    createdAt text,
+    sentAt text
+  );
+  alter table public.reminders enable row level security;
+  create policy "Users manage own reminders"
+    on public.reminders for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+*/

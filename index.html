@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EduManage SaaS MVP</title>
+    <meta
+      name="description"
+      content="EduManage coaching center management MVP for attendance, fees, reminders, and receipts."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="EduManage workspace">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M4 6.5 12 3l8 3.5-8 3.5-8-3.5Z"></path>
+              <path d="M7 10v5.2c0 1.7 2.2 3 5 3s5-1.3 5-3V10"></path>
+              <path d="M20 7v5"></path>
+            </svg>
+          </div>
+          <div>
+            <strong>EduManage</strong>
+            <span data-i18n="brand.tagline">Coaching OS</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-button is-active" data-view="dashboard" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 13h7V4H4v9Z"></path><path d="M13 20h7V4h-7v16Z"></path><path d="M4 20h7v-5H4v5Z"></path></svg>
+            </span>
+            <span data-i18n="nav.dashboard">Dashboard</span>
+          </button>
+          <button class="nav-button" data-view="students" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="3"></circle><path d="M21 20v-2.2a3.2 3.2 0 0 0-2.4-3.1"></path><path d="M16.5 4.3a3 3 0 0 1 0 5.4"></path></svg>
+            </span>
+            <span data-i18n="nav.students">Students</span>
+          </button>
+          <button class="nav-button" data-view="attendance" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4"></path><path d="M16 3v4"></path><path d="M4 10h16"></path><path d="m8 15 2 2 5-5"></path></svg>
+            </span>
+            <span data-i18n="nav.attendance">Attendance</span>
+          </button>
+          <button class="nav-button" data-view="fees" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 9h8"></path><path d="M8 13h5"></path><path d="M15.5 16.5h.01"></path></svg>
+            </span>
+            <span data-i18n="nav.fees">Fees</span>
+          </button>
+          <button class="nav-button" data-view="reminders" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 18h14"></path><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+            </span>
+            <span data-i18n="nav.reminders">Reminders</span>
+          </button>
+          <button class="nav-button" data-view="receipts" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 0 1 2-2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
+            </span>
+            <span data-i18n="nav.receipts">Receipts</span>
+          </button>
+          <button class="nav-button" data-view="settings" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 0 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.3 7A2 2 0 0 1 7.1 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 0 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1a2 2 0 0 1 0 4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+            </span>
+            <span data-i18n="nav.settings">Settings</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-summary">
+          <span data-i18n="plan.current">Current plan</span>
+          <strong id="sidebarPlan">Professional</strong>
+          <small id="sidebarStudentCount">0 students</small>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="workspaceLabel">Workspace</p>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="button ghost" id="langToggle" type="button">বাংলা</button>
+            <button class="button primary" data-action="open-student-form" type="button">
+              <span aria-hidden="true">+</span>
+              <span data-i18n="actions.addStudent">Add student</span>
+            </button>
+          </div>
+        </header>
+
+        <section id="viewRoot" class="view-root" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -9,6 +9,7 @@
       content="EduManage coaching center management MVP for attendance, fees, reminders, and receipts."
     >
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   </head>
   <body>
@@ -100,6 +101,24 @@
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div class="floating-social" id="floatingSocial">
+      <div class="social-menu" id="socialMenu">
+        <a href="https://linkedin.com/company/edumanage" target="_blank" rel="noopener noreferrer" class="social-link linkedin" aria-label="LinkedIn">
+          <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+        <a href="https://instagram.com/edumanage" target="_blank" rel="noopener noreferrer" class="social-link instagram" aria-label="Instagram">
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+        <a href="https://twitter.com/edumanage" target="_blank" rel="noopener noreferrer" class="social-link twitter" aria-label="Twitter">
+          <i class="fa-brands fa-x-twitter"></i>
+        </a>
+      </div>
+      <button class="social-toggle" id="socialToggle" aria-label="Follow Us" aria-expanded="false">
+        <i class="fa-solid fa-share-nodes"></i>
+        <span>Follow Us</span>
+      </button>
+    </div>
 
     <script src="app.js"></script>
   </body>

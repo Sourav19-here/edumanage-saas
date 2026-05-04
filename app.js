@@ -408,6 +408,26 @@ langToggle.addEventListener("click", () => {
   render();
 });
 
+// Floating social button toggle
+const socialToggle = document.getElementById("socialToggle");
+const floatingSocial = document.getElementById("floatingSocial");
+
+if (socialToggle && floatingSocial) {
+  socialToggle.addEventListener("click", () => {
+    floatingSocial.classList.toggle("open");
+    const isOpen = floatingSocial.classList.contains("open");
+    socialToggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (event) => {
+    if (!floatingSocial.contains(event.target) && floatingSocial.classList.contains("open")) {
+      floatingSocial.classList.remove("open");
+      socialToggle.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 function render() {
   if (!authReady) {
     viewRoot.innerHTML = `<div class="empty-state">Loading...</div>`;
